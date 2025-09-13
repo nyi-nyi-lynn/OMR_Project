@@ -8,7 +8,7 @@
       "C": "Mean Shift",
       "D": "Region Splitting"
     },
-    "answer": "B"
+    "answer": "A"
   },
   {
     "q_no": 2,
@@ -30,7 +30,7 @@
       "C": "Affine transformation",
       "D": "Perspective projection"
     },
-    "answer": "D"
+    "answer": "C"
   },
   {
     "q_no": 4,
@@ -41,7 +41,7 @@
       "C": "Texture analysis",
       "D": "Contour detection"
     },
-    "answer": "D"
+    "answer": "B"
   },
   {
     "q_no": 5,
@@ -52,6 +52,6 @@
       "C": "Image segmentation",
       "D": "Object detection"
     },
-    "answer": "A"
+    "answer": "D"
   }
 ]

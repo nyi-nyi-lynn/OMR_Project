@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 import json, os
 from omr.processor import realtime_scan, scan_image
-from omr.utils import check_answers, export_result
+from omr.utlis import check_answers, export_result
 
 os.makedirs("data", exist_ok=True)
 
@@ -64,10 +64,16 @@ class StudentPanel:
         printed_questions, printed_map = self._load_questions_and_layout()
         if printed_questions is None:
             return
+
         # Build answer_key mapping original_q_no -> correct answer from questions.json
+        # Letter → Number mapping
+        letter_to_index = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4}
         answer_key = {}
+
         for q in printed_questions:
-            answer_key[q["q_no"]] = q["answer"]
+            mapped_value = letter_to_index.get(q["answer"], -1)
+            answer_key[q["q_no"]] = mapped_value
+            # print(answer_key)
         try:
             answers, score = realtime_scan(student_id, answer_key)
         except Exception as e:
@@ -75,10 +81,17 @@ class StudentPanel:
             return
         total = len(answer_key)
         export_result(student_id, answers, score, total)
+
+        # Number → Letter mapping for display
+        index_to_letter = {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"}
+
         # prepare result text
         s = f"Student ID: {student_id}\nScore: {score}/{total}\n\n"
-        for q_no, correct in answer_key.items():
-            s += f"Q{q_no}: detected={answers.get(q_no,'-')} correct={correct}\n"
+        for q_no, correct_idx in answer_key.items():
+            detected = answers.get(q_no, "-")
+            correct_letter = index_to_letter.get(correct_idx, "-")  # convert number back to letter
+            s += f"Q{q_no}: detected={detected} correct={correct_letter}\n"
+
         self.result_label.config(text=s)
 
     def scan_image_file(self):
