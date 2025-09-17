@@ -53,7 +53,7 @@ def detect_bubbles(img, answer_key):
 
             # APPLY THRESHOLD
             imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
-            imgThresh = cv2.threshold(imgWarpGray, 170, 255, cv2.THRESH_BINARY_INV)[1]
+            imgThresh = cv2.threshold(imgWarpGray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
             # cv2.imshow("Thredshow",imgThresh)
             boxes = utlis.splitBoxes(imgThresh)  # GET INDIVIDUAL BOXES
             myPixelVal = np.zeros((questions, choices))  # TO STORE THE NON ZERO VALUES OF EACH BOX
@@ -71,17 +71,33 @@ def detect_bubbles(img, answer_key):
             # FIND THE USER ANSWERS
             for x in range(0, questions):
                 arr = myPixelVal[x]
-                myIndexVal = np.where(arr == np.amax(arr))
-                myIndex.append(int(myIndexVal[0][0]))  # save student answer index
+                maxVal = np.max(arr)
+                abs_threshold = 500  # ignore small smudges
+                rel_threshold = 0.8 * maxVal  # bubble must be ≥80% of the darkest one
+
+                # bubbles that are strongly filled
+                selected = [i for i, val in enumerate(arr) if val >= rel_threshold and val > abs_threshold]
+
+                if len(selected) == 1:
+                    # ✅ Valid single answer
+                    myIndex.append(selected[0])
+                elif len(selected) > 1:
+                    # ⚠️ Multiple filled bubbles
+                    myIndex.append(-1)
+                    print("select incorrect ",selected)
+                else:
+                    # ⭕ Blank
+                    myIndex.append(-2)
 
             print("Student Answers:", myIndex)
 
             # COMPARE WITH ANSWER KEY
             grading = []
+            correct_answers = []
             for i in range(questions):
                 student_answer = myIndex[i]
                 correct_answer = answer_key.get(i + 1, -1) # dict starts at 1
-                ans.append(correct_answer)
+                correct_answers.append(correct_answer)
                 if student_answer == correct_answer:
                     grading.append(1)
                 else:
@@ -91,10 +107,10 @@ def detect_bubbles(img, answer_key):
 
 
             # DISPLAYING ANSWERS
-            utlis.showAnswers(imgWarpColored, myIndex, grading, ans,questions,choices)  # DRAW DETECTED ANSWERS
+            utlis.showAnswers(imgWarpColored, myIndex, grading, correct_answers,questions,choices)  # DRAW DETECTED ANSWERS
             utlis.drawGrid(imgWarpColored)  # DRAW GRID
             imgRawDrawings = np.zeros_like(imgWarpColored)  # NEW BLANK IMAGE WITH WARP IMAGE SIZE
-            utlis.showAnswers(imgRawDrawings, myIndex, grading, myIndex)  # DRAW ON NEW IMAGE
+            utlis.showAnswers(imgRawDrawings, myIndex, grading, correct_answers,questions, choices)  # DRAW ON NEW IMAGE
             invMatrix = cv2.getPerspectiveTransform(pts2, pts1)  # INVERSE TRANSFORMATION MATRIX
             imgInvWarp = cv2.warpPerspective(imgRawDrawings, invMatrix, (widthImg, heightImg))  # INV IMAGE WARP
 
@@ -117,14 +133,14 @@ def detect_bubbles(img, answer_key):
     return imgFinal,score,myIndex
 
 def realtime_scan(student_id, answer_key):
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     if not cap.isOpened():
         print("❌ Cannot access camera!")
         return {}, 0
 
     print(f"📷 Camera started for Student ID: {student_id}")
     student_answers = {}
-
+    captured = False  # To track if answers were captured
 
     while True:
         ret, frame = cap.read()
@@ -143,20 +159,30 @@ def realtime_scan(student_id, answer_key):
         answers = {q_no: index_to_letter.get(ans, "-") for q_no, ans in answers.items()}
 
         # Show frame
-        cv2.imshow("OMR Realtime Scan - Press 'q' to finish", frame)
+        cv2.imshow("OMR Realtime Scan - Press 'c' to capture, 'q' to quit", frame)
 
-        # Store detected answers
-        student_answers.update(answers)
-
-        # Stop when 'q' pressed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('c'):
+            student_answers.update(answers)
+            captured = True
+            print("✅ Answers captured!")
             break
+        elif key == ord('q'):
+            if not captured:
+                print("⚠️ Exiting without capturing answers.")
+            break
+        # other keys are ignored
 
     cap.release()
     cv2.destroyAllWindows()
 
-    score = (score/100) * len(answer_key)
-    print(f"✅ Scan complete for Student {student_id}: Score {score}/{len(answer_key)}")
+    # Calculate score only if captured
+    if captured:
+        score = (score / 100) * len(answer_key)
+        print(f"✅ Scan complete for Student {student_id}: Score {score}/{len(answer_key)}")
+    else:
+        score = -1
+
     return student_answers, score
 
 

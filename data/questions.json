@@ -1,57 +1,62 @@
 [
   {
     "q_no": 1,
-    "text": "The _____ segmentation associates a unique region with each local minimum, which can lead to over-segmentation.",
+    "text": "Which technique is commonly used to detect edges in an image?",
     "choices": {
-      "A": "Region Merging",
-      "B": "Watershed",
-      "C": "Mean Shift",
-      "D": "Region Splitting"
-    },
-    "answer": "A"
-  },
-  {
-    "q_no": 2,
-    "text": "The key to _____ is a technique for efficiently finding peaks in this high-dimensional data distribution without ever computing the complete function explicitly.",
-    "choices": {
-      "A": "Mean Shift",
-      "B": "Watershed",
-      "C": "Region Splitting",
-      "D": "Region Merging"
-    },
-    "answer": "A"
-  },
-  {
-    "q_no": 3,
-    "text": "To represent the transformation from a 3D scene to a 2D image, the ____ concept is used.To represent the transformation from a 3D scene to a 2D image, the ____ concept is used.",
-    "choices": {
-      "A": "Euler angles",
-      "B": "Homography",
-      "C": "Affine transformation",
-      "D": "Perspective projection"
-    },
-    "answer": "C"
-  },
-  {
-    "q_no": 4,
-    "text": "The ____ technique is used to detect and recognize objects based on their geometric shapes.",
-    "choices": {
-      "A": "Blob detection",
-      "B": "Edge detection",
-      "C": "Texture analysis",
-      "D": "Contour detection"
+      "A": "K-Means Clustering",
+      "B": "Canny Edge Detection",
+      "C": "Histogram Equalization",
+      "D": "Fourier Transform",
+      "E": "Gaussian Blur"
     },
     "answer": "B"
   },
   {
-    "q_no": 5,
-    "text": "The __ is not a fundamental task in computer vision.",
+    "q_no": 2,
+    "text": "What does the term “convolution” refer to in Convolutional Neural Networks (CNNs)?",
     "choices": {
-      "A": "Voice recognition",
-      "B": "Image classification",
-      "C": "Image segmentation",
-      "D": "Object detection"
+      "A": "Multiplying two matrices element-wise",
+      "B": "Sliding a filter/kernel over an image",
+      "C": "Normalizing pixel values",
+      "D": "Pooling regions of an image",
+      "E": "Flattening the image into a vector"
     },
-    "answer": "D"
+    "answer": "B"
+  },
+  {
+    "q_no": 3,
+    "text": "Which color space separates intensity from color information?",
+    "choices": {
+      "A": "RGB",
+      "B": "HSV",
+      "C": "CMYK",
+      "D": "LAB",
+      "E": "YUV"
+    },
+    "answer": "B"
+  },
+  {
+    "q_no": 4,
+    "text": "What is the purpose of image thresholding?",
+    "choices": {
+      "A": "Convert image to color",
+      "B": "Compress the image",
+      "C": "Segment objects from background",
+      "D": "Remove noise",
+      "E": "Detect edges"
+    },
+    "answer": "C"
+  },
+  {
+    "q_no": 5,
+    "text": "Which algorithm is typically used for face detection?",
+    "choices": {
+      "A": "SIFT",
+      "B": "Haar Cascade",
+      "C": "RANSAC",
+      "D": "KNN",
+      "E": "PCA"
+    },
+    "answer": "B"
   }
 ]

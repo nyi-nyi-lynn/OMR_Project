@@ -115,34 +115,68 @@ def check_answers(student_answers, answer_key):
     return score, total, details
 
 def export_result(student_id, answers, score, total, file_path="results/results.csv"):
+    # Ensure the folder exists
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    # Check if file exists to write header
     header_needed = not os.path.exists(file_path)
+
     with open(file_path, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         if header_needed:
-            writer.writerow(["student_id", "answers_dict", "score", "total"])
+            writer.writerow(["Student Name", "Answers", "Score", "Total"])
         writer.writerow([student_id, str(answers), score, total])
+
+
 
 
 def showAnswers(img, myIndex, grading, ans, questions=5, choices=5):
     secW = int(img.shape[1] / questions)
     secH = int(img.shape[0] / choices)
-    # print("secw and secH" ,secW ,secH)
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 1
+    thickness = 5
+
     for x in range(0, questions):
         myAns = myIndex[x]
-        cX = (myAns * secW) + secW // 2
-        cY = (x * secH) + secH // 2
-        if grading[x] == 1:
-            myColor = (0, 255, 0)
-            # cv2.rectangle(img,(myAns*secW,x*secH),((myAns*secW)+secW,(x*secH)+secH),myColor,cv2.FILLED)
-            cv2.circle(img, (cX, cY), 50, myColor, cv2.FILLED)
-        else:
-            myColor = (0, 0, 255)
-            # cv2.rectangle(img, (myAns * secW, x * secH), ((myAns * secW) + secW, (x * secH) + secH), myColor, cv2.FILLED)
+
+        # CASE 1: Valid single answer
+        if isinstance(myAns, int) and myAns >= 0:
+            cX = (myAns * secW) + secW // 2
+            cY = (x * secH) + secH // 2
+
+            if grading[x] == 1:
+                myColor = (0, 255, 0)  # Green for correct
+            else:
+                myColor = (0, 0, 255)  # Red for wrong
+
+            # Draw the student's answer
             cv2.circle(img, (cX, cY), 50, myColor, cv2.FILLED)
 
-            # CORRECT ANSWER
-            myColor = (0, 255, 0)
-            correctAns = ans[x]
-            cv2.circle(img, ((correctAns * secW) + secW // 2, (x * secH) + secH // 2),
-                       20, myColor, cv2.FILLED)
+            # Draw correct answer if student is wrong
+            if grading[x] != 1:
+                correctAns = ans[x]
+                cv2.circle(img, ((correctAns * secW) + secW // 2, (x * secH) + secH // 2),
+                           20, (0, 255, 0), cv2.FILLED)
+
+        # CASE 2: Multiple answers or no answer
+        else:
+            # Draw a straight red line across the row
+            start_point = (0, (x * secH) + secH // 2)
+            end_point = (img.shape[1], (x * secH) + secH // 2)
+            cv2.line(img, start_point, end_point, (0, 0, 255), 20)
+
+            # Optionally, write "Invalid" on the right
+            text = "Invalid"
+            text_x = img.shape[1] - 150
+            text_y = (x * secH) + secH // 2 + 10
+            cv2.putText(img, text, (text_x, text_y), font, font_scale, (0, 0, 255), thickness)
+
+            if grading[x] != 1:
+                correctAns = ans[x]
+                cv2.circle(img, ((correctAns * secW) + secW // 2, (x * secH) + secH // 2),
+                           20, (0, 255, 0), cv2.FILLED)
+
+    return img
 
